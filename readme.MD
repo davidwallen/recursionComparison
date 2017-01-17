@@ -16,4 +16,4 @@ Performance of the two implementations is reasonably similar. Memory footprint i
   result: 'success',
   kTPS: 223 }
 ```
-Why is the recursive implementation so memory intensive? Understanding this requires a bit of explantion of how javascript stacks and global execution context. A good exposition can be found here: http://www.datchley.name/recursion-tail-calls-and-trampolines/
+Why is the recursive implementation so memory intensive? Understanding this requires a bit of explantion of how javascript manages execution stacks and the global execution context. A good exposition can be found here: http://www.datchley.name/recursion-tail-calls-and-trampolines/
