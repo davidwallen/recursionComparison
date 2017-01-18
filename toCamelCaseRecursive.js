@@ -61,7 +61,3 @@ function _objToCamelCase(o, newKeys) {
     }
     return objectToReturn;
 };
-
-module.exports = {
-    objToCamelCase
-};

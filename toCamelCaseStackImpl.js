@@ -57,8 +57,3 @@ var objToCamelCase = function (obj) {
     }
     return obj;
 }
-
-
-module.exports = {
-    objToCamelCase
-};

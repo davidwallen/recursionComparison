@@ -8,7 +8,7 @@ function monitor(n) {
     }
     if (monitors[n]) {
         var elapsed = Date.now() - monitors[n].startTime,
-            mem = (process.memoryUsage().heapUsed - monitors[n].startMem),
+            mem = (java.lang.Runtime.getRuntime().totalMemory() - java.lang.Runtime.getRuntime().freeMemory()) - monitors[n].startMem,
             label = " bytes";
 
         if (mem > 1024) {
@@ -34,7 +34,7 @@ function monitor(n) {
         totalGC();
         monitors[n] = {
             startTime: Date.now(),
-            startMem: process.memoryUsage().heapUsed
+            startMem: java.lang.Runtime.getRuntime().totalMemory() - java.lang.Runtime.getRuntime().freeMemory() //process.memoryUsage().heapUsed
         };
     }
 };
@@ -180,21 +180,18 @@ for (var j = 0; j < impls.length; j++) {
 }
 
 function totalGC() {
-    var i = 10;
-    while (i-- > 0) {
-        global.gc();
-    }
+    java.lang.System.gc();
 }
 
 for (var i = 0; i < impls.length; i++) {
-    //console.log(testObj[i]);
     monitor(impls[i]);
-    var impl = require('./' + impls[i] + '.js'), resultObj;
+    var resultObj;
+
+    load('./' + impls[i] + '.js')
     try {
         for (var j = 0; j < loops; j++) {
-            resultObj = impl.objToCamelCase(testObj[i]);
+            resultObj = objToCamelCase(testObj[i]);
         }
-        //console.log(JSON.stringify(resultObj, null, 4));
         resultObj = 'success';
     }
     catch (e) {
@@ -203,7 +200,5 @@ for (var i = 0; i < impls.length; i++) {
     var m = monitor(impls[i]);
     m.result = resultObj;
     m.kTPS = Math.floor(60 / (m.milliseconds / loops));
-    console.log(m);
+    java.lang.System.out.println(JSON.stringify(m));
 }
-
-process.exit();
