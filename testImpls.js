@@ -1,6 +1,5 @@
-var impls = ["toCamelCaseRecursive", "toCamelCaseStackImpl"];
-
-var testObj = [], nestLevel = 10, arrayElements = 10, loops = 1000, monitors = {};
+var impls = ["toCamelCaseRecursive", "toCamelCaseStackImpl"], testObj = [],
+    nestLevel = 10, arrayElements = 10, loops = 10000, monitors = {}, envMem;
 
 function monitor(n) {
     if (!n) {
@@ -8,9 +7,8 @@ function monitor(n) {
     }
     if (monitors[n]) {
         var elapsed = Date.now() - monitors[n].startTime,
-            mem = (java.lang.Runtime.getRuntime().totalMemory() - java.lang.Runtime.getRuntime().freeMemory()) - monitors[n].startMem,
+            mem = monitors[n].startMem - java.lang.Runtime.getRuntime().freeMemory(),
             label = " bytes";
-
         if (mem > 1024) {
             mem = mem / 1024;
             label = " kb";
@@ -31,10 +29,9 @@ function monitor(n) {
         delete monitors[n];
         return result;
     } else {
-        totalGC();
         monitors[n] = {
             startTime: Date.now(),
-            startMem: java.lang.Runtime.getRuntime().totalMemory() - java.lang.Runtime.getRuntime().freeMemory() //process.memoryUsage().heapUsed
+            startMem: java.lang.Runtime.getRuntime().freeMemory()
         };
     }
 };
@@ -179,15 +176,13 @@ for (var j = 0; j < impls.length; j++) {
     testObj[j].RelatedTitle = nestInsideSelf({ ID: "123-098-7654", Title: "Space 1999", ReleaseDate: "03/03/1981", ContentRating: "G", Genre: "Science Fiction" }, nestLevel);
 }
 
-function totalGC() {
-    java.lang.System.gc();
-}
 
 for (var i = 0; i < impls.length; i++) {
+    java.lang.System.gc();
     monitor(impls[i]);
     var resultObj;
+    load('./' + impls[i] + '.js');
 
-    load('./' + impls[i] + '.js')
     try {
         for (var j = 0; j < loops; j++) {
             resultObj = objToCamelCase(testObj[i]);
