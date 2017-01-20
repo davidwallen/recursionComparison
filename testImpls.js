@@ -7,7 +7,7 @@ function monitor(n) {
     }
     if (monitors[n]) {
         var elapsed = Date.now() - monitors[n].startTime,
-            mem = monitors[n].startMem - java.lang.Runtime.getRuntime().freeMemory(),
+            mem = monitors[n].startMem - myFreeMemory(),
             label = " bytes";
         if (mem > 1024) {
             mem = mem / 1024;
@@ -31,7 +31,7 @@ function monitor(n) {
     } else {
         monitors[n] = {
             startTime: Date.now(),
-            startMem: java.lang.Runtime.getRuntime().freeMemory()
+            startMem: myFreeMemory()
         };
     }
 };
@@ -178,10 +178,10 @@ for (var j = 0; j < impls.length; j++) {
 
 
 for (var i = 0; i < impls.length; i++) {
-    java.lang.System.gc();
+    myGC();
     monitor(impls[i]);
     var resultObj;
-    load('./' + impls[i] + '.js');
+    myLoad('./' + impls[i] + '.js');
 
     try {
         for (var j = 0; j < loops; j++) {
@@ -195,5 +195,42 @@ for (var i = 0; i < impls.length; i++) {
     var m = monitor(impls[i]);
     m.result = resultObj;
     m.kTPS = Math.floor(60 / (m.milliseconds / loops));
-    java.lang.System.out.println(JSON.stringify(m));
+    myConsole(JSON.stringify(m));
 }
+
+function myGC() {
+    if (typeof java != 'undefined') {
+        java.lang.System.gc();
+    } else {
+        global.gc();
+    }
+}
+
+function myConsole(arg) {
+    if (typeof java != 'undefined') {
+        java.lang.System.out.println(arg);
+    } else {
+        console.log(arg);
+    }
+}
+
+function myFreeMemory() {
+    if (typeof java != 'undefined') {
+        return java.lang.Runtime.getRuntime().freeMemory();
+    } else {
+        var mem = process.memoryUsage();
+        return mem.heapTotal - mem.heapUsed;
+    }
+}
+
+function myLoad(scriptFile) {
+    if (typeof java != 'undefined') {
+        load(scriptFile);
+    } else {
+        var module = require(scriptFile);
+        objToCamelCase = module.objToCamelCase;
+    }
+}
+
+
+if (typeof java === 'undefined') { process.exit(); }

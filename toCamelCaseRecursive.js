@@ -61,3 +61,9 @@ function _objToCamelCase(o, newKeys) {
     }
     return objectToReturn;
 };
+
+if (typeof module != 'undefined') {
+    module.exports = {
+        objToCamelCase: objToCamelCase
+    }
+}
